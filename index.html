@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>HIF Haru Oni | Inspección Diaria MTG-D2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Source+Code+Pro:wght@400;500;600&display=swap');
+
+  :root {
+    --hif-navy:    #1a2e4a;
+    --hif-blue:    #1e4d8c;
+    --hif-teal:    #00a99d;
+    --hif-orange:  #f26522;
+    --hif-yellow:  #fbb040;
+    --hif-magenta: #ed1e79;
+    --hif-light:   #f4f7fb;
+    --hif-border:  #d0dae8;
+    --ok:          #1aaf5d;
+    --warn:        #f59e0b;
+    --danger:      #e02626;
+    --text:        #2c3e50;
+    --text-light:  #7a90a8;
+    --white:       #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--hif-light);
+    color: var(--text);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--white);
+    border-bottom: 3px solid var(--hif-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(26,46,74,0.10);
+  }
+
+  .header-brand {
+    background: var(--hif-navy);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* HIF SVG Logo inline */
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .hif-logo-svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .logo-text {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--white);
+    letter-spacing: 1px;
+  }
+
+  .plant-badge {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .header-title-bar {
+    padding: 10px 16px 8px;
+    border-bottom: 1px solid var(--hif-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .form-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--hif-navy);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .form-title span {
+    color: var(--hif-teal);
+  }
+
+  .doc-ref {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 9px;
+    color: var(--text-light);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* META FIELDS */
+  .header-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 10px 16px 8px;
+    background: var(--hif-light);
+  }
+
+  .meta-field { display: flex; flex-direction: column; gap: 3px; }
+
+  .meta-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--hif-blue);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .meta-input {
+    background: var(--white);
+    border: 1.5px solid var(--hif-border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 10px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .meta-input:focus {
+    border-color: var(--hif-teal);
+    box-shadow: 0 0 0 3px rgba(0,169,157,0.12);
+  }
+
+  select.meta-input option { background: white; }
+
+  /* PROGRESS */
+  .progress-wrap {
+    padding: 6px 16px 8px;
+    background: var(--white);
+  }
+
+  .progress-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .progress-pct {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--hif-teal);
+    letter-spacing: 1px;
+  }
+
+  .progress-count {
+    font-size: 10px;
+    color: var(--text-light);
+    font-weight: 500;
+  }
+
+  .progress-bar {
+    height: 5px;
+    background: var(--hif-border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--hif-teal), var(--hif-blue));
+    width: 0%;
+    transition: width 0.4s ease;
+    border-radius: 3px;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    margin: 14px 10px 0;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 14px;
+    background: var(--hif-navy);
+    border-radius: 6px 6px 0 0;
+    margin-bottom: 0;
+  }
+
+  .section-stripe {
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--hif-teal), var(--hif-orange));
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--white);
+    text-transform: uppercase;
+    flex: 1;
+  }
+
+  .section-count {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+  }
+
+  /* ─── EQUIPMENT ROWS ─── */
+  .equip-row {
+    background: var(--white);
+    border: 1px solid var(--hif-border);
+    border-top: none;
+    padding: 10px 14px;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .equip-row:last-child {
+    border-radius: 0 0 6px 6px;
+    border-bottom: 2px solid var(--hif-border);
+    margin-bottom: 0;
+  }
+
+  /* Left status stripe */
+  .equip-row::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--hif-border);
+    transition: background 0.25s;
+  }
+
+  .equip-row.status-ok::before   { background: var(--ok); }
+  .equip-row.status-warn::before { background: var(--warn); }
+  .equip-row.status-danger::before { background: var(--danger); }
+
+  .equip-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .equip-num {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-light);
+    min-width: 20px;
+  }
+
+  .equip-tag {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--hif-blue);
+    background: rgba(30,77,140,0.07);
+    padding: 2px 8px;
+    border-radius: 4px;
+    min-width: 90px;
+    text-align: center;
+    border: 1px solid rgba(30,77,140,0.15);
+  }
+
+  .equip-desc {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .equip-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-left: 28px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 100px;
+  }
+
+  .field-group.full { width: 100%; min-width: unset; }
+
+  .field-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .field-input {
+    background: var(--hif-light);
+    border: 1.5px solid var(--hif-border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 10px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .field-input:focus {
+    border-color: var(--hif-teal);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(0,169,157,0.10);
+  }
+
+  .field-input.value-warn {
+    border-color: var(--warn);
+    background: #fffbf0;
+    color: #92650a;
+  }
+
+  .field-input.value-danger {
+    border-color: var(--danger);
+    background: #fff5f5;
+    color: var(--danger);
+  }
+
+  .field-input.value-ok {
+    border-color: rgba(26,175,93,0.35);
+  }
+
+  .range-hint {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 8px;
+    color: var(--text-light);
+    min-height: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  .range-hint.hint-warn   { color: var(--warn); font-weight: 600; }
+  .range-hint.hint-danger { color: var(--danger); font-weight: 600; }
+  .range-hint.hint-ok     { color: var(--ok); }
+
+  /* ─── VISUAL INSPECTION ─── */
+  .visual-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin: 6px 0 4px 28px;
+  }
+
+  .visual-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .check-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 5px 12px;
+    border: 1.5px solid var(--hif-border);
+    border-radius: 20px;
+    transition: all 0.18s;
+    user-select: none;
+    background: var(--hif-light);
+  }
+
+  .check-option:hover { border-color: var(--hif-teal); background: rgba(0,169,157,0.05); }
+  .check-option input[type="radio"] { display: none; }
+
+  .check-option.selected-ok {
+    border-color: var(--ok);
+    background: rgba(26,175,93,0.08);
+    color: var(--ok);
+  }
+
+  .check-option.selected-no {
+    border-color: var(--danger);
+    background: rgba(224,38,38,0.07);
+    color: var(--danger);
+  }
+
+  .check-option.selected-na {
+    border-color: var(--text-light);
+    background: rgba(122,144,168,0.1);
+    color: var(--text-light);
+  }
+
+  .check-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    flex-shrink: 0;
+    transition: background 0.18s;
+  }
+
+  .check-option.selected-ok .check-dot,
+  .check-option.selected-no .check-dot,
+  .check-option.selected-na .check-dot { background: currentColor; }
+
+  .check-text {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  /* ANOMALY ALERT */
+  .anomaly-flag {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: #fff8e1;
+    border: 1px solid #f59e0b;
+    border-radius: 5px;
+    padding: 5px 10px 5px 28px;
+    margin: 5px 0 0;
+    font-size: 10px;
+    font-weight: 600;
+    color: #92650a;
+  }
+
+  .anomaly-flag.visible { display: flex; }
+
+  /* COMMENTS */
+  .comment-input {
+    background: var(--hif-light);
+    border: 1.5px solid var(--hif-border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    padding: 6px 10px;
+    width: 100%;
+    outline: none;
+    resize: none;
+    min-height: 28px;
+    transition: border-color 0.2s;
+  }
+
+  .comment-input:focus {
+    border-color: var(--hif-teal);
+    background: var(--white);
+  }
+
+  /* DIVIDER between rows */
+  .equip-row + .equip-row { border-top: 1px solid var(--hif-border); }
+
+  /* ACEITE SELECT */
+  .aceite-ok   { color: var(--ok); }
+  .aceite-warn { color: var(--warn); }
+
+  /* ─── SUBMIT FOOTER ─── */
+  .submit-area {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-top: 2px solid var(--hif-border);
+    padding: 10px 14px 12px;
+    z-index: 200;
+    box-shadow: 0 -4px 16px rgba(26,46,74,0.10);
+  }
+
+  .summary-chips {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .chip {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  .chip-ok     { background: rgba(26,175,93,0.1);  color: var(--ok);     border: 1px solid rgba(26,175,93,0.3);  }
+  .chip-warn   { background: rgba(245,158,11,0.1); color: var(--warn);   border: 1px solid rgba(245,158,11,0.3); }
+  .chip-danger { background: rgba(224,38,38,0.1);  color: var(--danger); border: 1px solid rgba(224,38,38,0.3);  }
+  .chip-idle   { background: var(--hif-light);     color: var(--text-light); border: 1px solid var(--hif-border); }
+
+  .btn-submit {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--hif-navy), var(--hif-blue));
+    border: none;
+    border-radius: 8px;
+    color: var(--white);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(26,46,74,0.25);
+  }
+
+  .btn-submit:hover {
+    background: linear-gradient(135deg, #243d60, #1e5ca8);
+    box-shadow: 0 6px 20px rgba(26,46,74,0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-submit:active { transform: translateY(0); }
+
+  /* ─── SUCCESS SCREEN ─── */
+  #success-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--hif-light);
+    z-index: 999;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    padding: 30px 20px 40px;
+  }
+
+  #success-screen.visible { display: flex; }
+
+  .success-header {
+    background: var(--hif-navy);
+    border-radius: 12px;
+    padding: 20px 24px;
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .success-check {
+    width: 48px;
+    height: 48px;
+    background: var(--ok);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .success-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .success-sub {
+    font-size: 10px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 3px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+  }
+
+  .summary-card {
+    background: var(--white);
+    border: 1px solid var(--hif-border);
+    border-radius: 10px;
+    padding: 16px;
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(26,46,74,0.06);
+  }
+
+  .summary-card-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--hif-border);
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--hif-light);
+    font-size: 12px;
+  }
+
+  .summary-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .summary-row .s-label { color: var(--text-light); font-weight: 500; font-size: 11px; }
+  .summary-row .s-val   { font-weight: 700; font-size: 13px; }
+  .val-ok     { color: var(--ok); }
+  .val-warn   { color: var(--warn); }
+  .val-danger { color: var(--danger); }
+  .val-navy   { color: var(--hif-navy); }
+
+  .sync-note {
+    background: rgba(0,169,157,0.08);
+    border: 1px solid rgba(0,169,157,0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--hif-teal);
+    font-weight: 600;
+  }
+
+  .btn-new {
+    width: 100%;
+    max-width: 420px;
+    padding: 12px;
+    background: transparent;
+    border: 2px solid var(--hif-navy);
+    border-radius: 8px;
+    color: var(--hif-navy);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-new:hover {
+    background: var(--hif-navy);
+    color: var(--white);
+  }
+
+  /* gradient accent bar at bottom of section headers */
+  .accent-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 560px) {
+    .header-meta { grid-template-columns: repeat(4, 1fr); }
+    .equip-fields { flex-wrap: nowrap; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <!-- BRAND BAR -->
+  <div class="header-brand">
+    <div class="logo-area">
+      <!-- HIF Logo recreation as inline SVG -->
+      <svg class="hif-logo-svg" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Spiral petals -->
+        <path d="M30 30 C30 20, 38 12, 44 16 C50 20, 48 30, 42 32 C36 34, 30 30, 30 30Z" fill="#ed1e79" opacity="0.9"/>
+        <path d="M30 30 C38 30, 46 36, 44 44 C42 50, 32 50, 28 44 C24 38, 30 30, 30 30Z" fill="#f26522" opacity="0.9"/>
+        <path d="M30 30 C30 38, 22 46, 16 42 C10 38, 12 28, 18 26 C24 24, 30 30, 30 30Z" fill="#fbb040" opacity="0.9"/>
+        <path d="M30 30 C22 30, 14 24, 16 16 C18 10, 28 10, 32 16 C36 22, 30 30, 30 30Z" fill="#00a99d" opacity="0.9"/>
+      </svg>
+      <span class="logo-text">HIF</span>
+    </div>
+    <span class="plant-badge">Haru Oni · Punta Arenas</span>
+  </div>
+
+  <!-- TITLE BAR -->
+  <div class="header-title-bar">
+    <div>
+      <div class="form-title">Inspección Diaria <span>MTG-D2</span></div>
+    </div>
+    <div class="doc-ref">HIF00-HSE-FRG-027<br>Rev.0 · 05.09.2023</div>
+  </div>
+
+  <!-- META -->
+  <div class="header-meta">
+    <div class="meta-field">
+      <span class="meta-label">Fecha</span>
+      <input type="date" class="meta-input" id="meta-fecha">
+    </div>
+    <div class="meta-field">
+      <span class="meta-label">Turno</span>
+      <select class="meta-input" id="meta-turno">
+        <option value="">— Seleccionar —</option>
+        <option value="DÍA 1">DÍA 1</option>
+        <option value="DÍA 2">DÍA 2</option>
+        <option value="NOCHE 1">NOCHE 1</option>
+        <option value="NOCHE 2">NOCHE 2</option>
+      </select>
+    </div>
+    <div class="meta-field">
+      <span class="meta-label">Operador</span>
+      <input type="text" class="meta-input" id="meta-operador" placeholder="Nombre completo">
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="progress-pct" id="progress-pct">0%</span>
+      <span class="progress-count" id="progress-label">0 / 23 equipos</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+</header>
+
+<!-- ══════════ NIVEL 0 - SKID 200 ══════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-stripe"></div>
+    <span class="section-title">Nivel 0 — Skid 200</span>
+    <span class="section-count">01 – 12</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="equip-row" id="row-1">
+    <div class="equip-top">
+      <span class="equip-num">01</span>
+      <span class="equip-tag">V-201 / LG-201</span>
+      <span class="equip-desc">Estanque Metanol Crudo</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Nivel [cm]</span>
+        <input type="number" step="0.1" class="field-input" data-row="1" data-field="nivel_cm" placeholder="—"
+          data-min="10" data-max="250" data-warn-low="20" data-warn-high="220">
+        <span class="range-hint" id="hint-1-nivel_cm">Rango: 10 – 250 cm</span>
+      </div>
+    </div>
+    <div class="visual-section-label">Integridad visual</div>
+    <div class="equip-fields">
+      <div class="visual-row" id="vis-1">
+        <label class="check-option" onclick="setVisual('1','ok',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">OK</span></label>
+        <label class="check-option" onclick="setVisual('1','no',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">ANOMALÍA</span></label>
+        <label class="check-option" onclick="setVisual('1','na',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">N/A</span></label>
+      </div>
+    </div>
+    <div class="anomaly-flag" id="anom-1">⚠ Anomalía detectada — describir en comentarios</div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="equip-row" id="row-2">
+    <div class="equip-top">
+      <span class="equip-num">02</span>
+      <span class="equip-tag">PG-201</span>
+      <span class="equip-desc">Presión V-201</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="2" data-field="presion" placeholder="—"
+          data-min="0" data-max="0.5" data-warn-high="0.4">
+        <span class="range-hint" id="hint-2-presion">Rango: 0 – 0.5 MPa</span>
+      </div>
+    </div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="equip-row" id="row-3">
+    <div class="equip-top">
+      <span class="equip-num">03</span>
+      <span class="equip-tag">P-201</span>
+      <span class="equip-desc">Bomba de Metanol Crudo</span>
+    </div>
+    <div class="visual-section-label">Integridad visual</div>
+    <div class="equip-fields">
+      <div class="visual-row" id="vis-3">
+        <label class="check-option" onclick="setVisual('3','ok',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">OK</span></label>
+        <label class="check-option" onclick="setVisual('3','no',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">ANOMALÍA</span></label>
+        <label class="check-option" onclick="setVisual('3','na',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">N/A</span></label>
+      </div>
+      <div class="field-group">
+        <span class="field-label">Nivel aceite</span>
+        <select class="field-input" data-row="3" data-field="aceite" onchange="handleAceite(this,'3')">
+          <option value="">—</option>
+          <option value="NORMAL">NORMAL</option>
+          <option value="BAJO">BAJO</option>
+          <option value="ALTO">ALTO</option>
+          <option value="SIN ACEITE">SIN ACEITE</option>
+        </select>
+      </div>
+    </div>
+    <div class="anomaly-flag" id="anom-3">⚠ Anomalía detectada — describir en comentarios</div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="equip-row" id="row-4">
+    <div class="equip-top">
+      <span class="equip-num">04</span>
+      <span class="equip-tag">PG-202</span>
+      <span class="equip-desc">Presión descarga bomba P-201</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="4" data-field="presion" placeholder="—"
+          data-min="0.1" data-max="2.0" data-warn-low="0.15">
+        <span class="range-hint" id="hint-4-presion">Rango: 0.1 – 2.0 MPa</span>
+      </div>
+    </div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="equip-row" id="row-5">
+    <div class="equip-top">
+      <span class="equip-num">05</span>
+      <span class="equip-tag">PG-203 / PD-201</span>
+      <span class="equip-desc">Presión damper descarga P-201</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="5" data-field="presion" placeholder="—">
+        <span class="range-hint" id="hint-5-presion"></span>
+      </div>
+    </div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="equip-row" id="row-6">
+    <div class="equip-top">
+      <span class="equip-num">06</span>
+      <span class="equip-tag">P-202</span>
+      <span class="equip-desc">Bomba Agua Desecho</span>
+    </div>
+    <div class="visual-section-label">Integridad visual</div>
+    <div class="equip-fields">
+      <div class="visual-row" id="vis-6">
+        <label class="check-option" onclick="setVisual('6','ok',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">OK</span></label>
+        <label class="check-option" onclick="setVisual('6','no',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">ANOMALÍA</span></label>
+        <label class="check-option" onclick="setVisual('6','na',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">N/A</span></label>
+      </div>
+      <div class="field-group">
+        <span class="field-label">Nivel aceite</span>
+        <select class="field-input" data-row="6" data-field="aceite" onchange="handleAceite(this,'6')">
+          <option value="">—</option>
+          <option value="NORMAL">NORMAL</option>
+          <option value="BAJO">BAJO</option>
+          <option value="ALTO">ALTO</option>
+          <option value="SIN ACEITE">SIN ACEITE</option>
+        </select>
+      </div>
+    </div>
+    <div class="anomaly-flag" id="anom-6">⚠ Anomalía detectada — describir en comentarios</div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="equip-row" id="row-7">
+    <div class="equip-top">
+      <span class="equip-num">07</span>
+      <span class="equip-tag">PG-205</span>
+      <span class="equip-desc">Presión descarga P-202</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="7" data-field="presion" placeholder="—">
+        <span class="range-hint" id="hint-7-presion"></span>
+      </div>
+    </div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="equip-row" id="row-8">
+    <div class="equip-top">
+      <span class="equip-num">08</span>
+      <span class="equip-tag">PG-204 / PD-202</span>
+      <span class="equip-desc">Presión damper descarga P-202</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="8" data-field="presion" placeholder="—">
+        <span class="range-hint" id="hint-8-presion"></span>
+      </div>
+    </div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="equip-row" id="row-9">
+    <div class="equip-top">
+      <span class="equip-num">09</span>
+      <span class="equip-tag">E-201</span>
+      <span class="equip-desc">Intercambiador de fondo T-200</span>
+    </div>
+    <div class="visual-section-label">Integridad visual</div>
+    <div class="equip-fields">
+      <div class="visual-row" id="vis-9">
+        <label class="check-option" onclick="setVisual('9','ok',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">OK</span></label>
+        <label class="check-option" onclick="setVisual('9','no',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">ANOMALÍA</span></label>
+        <label class="check-option" onclick="setVisual('9','na',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">N/A</span></label>
+      </div>
+    </div>
+    <div class="anomaly-flag" id="anom-9">⚠ Anomalía detectada — describir en comentarios</div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="equip-row" id="row-10">
+    <div class="equip-top">
+      <span class="equip-num">10</span>
+      <span class="equip-tag">P-203</span>
+      <span class="equip-desc">Bomba Metanol Producto</span>
+    </div>
+    <div class="visual-section-label">Integridad visual</div>
+    <div class="equip-fields">
+      <div class="visual-row" id="vis-10">
+        <label class="check-option" onclick="setVisual('10','ok',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">OK</span></label>
+        <label class="check-option" onclick="setVisual('10','no',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">ANOMALÍA</span></label>
+        <label class="check-option" onclick="setVisual('10','na',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">N/A</span></label>
+      </div>
+    </div>
+    <div class="anomaly-flag" id="anom-10">⚠ Anomalía detectada — describir en comentarios</div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 11 -->
+  <div class="equip-row" id="row-11">
+    <div class="equip-top">
+      <span class="equip-num">11</span>
+      <span class="equip-tag">PG-209</span>
+      <span class="equip-desc">Presión descarga P-203</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="11" data-field="presion" placeholder="—">
+        <span class="range-hint" id="hint-11-presion"></span>
+      </div>
+    </div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 12 -->
+  <div class="equip-row" id="row-12">
+    <div class="equip-top">
+      <span class="equip-num">12</span>
+      <span class="equip-tag">PD-203 / PG-208</span>
+      <span class="equip-desc">Presión damper descarga P-203</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="12" data-field="presion" placeholder="—">
+        <span class="range-hint" id="hint-12-presion"></span>
+      </div>
+    </div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ NIVEL 1 - SKID 200 ══════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-stripe"></div>
+    <span class="section-title">Nivel 1 — Skid 200</span>
+    <span class="section-count">13 – 20</span>
+  </div>
+
+  <!-- 13 -->
+  <div class="equip-row" id="row-13">
+    <div class="equip-top">
+      <span class="equip-num">13</span>
+      <span class="equip-tag">PG-207</span>
+      <span class="equip-desc">Presión V-202</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="13" data-field="presion" placeholder="—">
+        <span class="range-hint" id="hint-13-presion"></span>
+      </div>
+    </div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 14 -->
+  <div class="equip-row" id="row-14">
+    <div class="equip-top">
+      <span class="equip-num">14</span>
+      <span class="equip-tag">V-202</span>
+      <span class="equip-desc">Estanque Metanol Producto</span>
+    </div>
+    <div class="visual-section-label">Integridad visual</div>
+    <div class="equip-fields">
+      <div class="visual-row" id="vis-14">
+        <label class="check-option" onclick="setVisual('14','ok',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">OK</span></label>
+        <label class="check-option" onclick="setVisual('14','no',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">ANOMALÍA</span></label>
+        <label class="check-option" onclick="setVisual('14','na',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">N/A</span></label>
+      </div>
+    </div>
+    <div class="anomaly-flag" id="anom-14">⚠ Anomalía detectada — describir en comentarios</div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 15 -->
+  <div class="equip-row" id="row-15">
+    <div class="equip-top">
+      <span class="equip-num">15</span>
+      <span class="equip-tag">PG-213</span>
+      <span class="equip-desc">Manómetro A. Arriba PCV-204</span>
+    </div>
+    <div class="equip-fields">
+      <div class="visual-row" id="vis-15">
+        <label class="check-option" onclick="setVisual('15','ok',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">OK</span></label>
+        <label class="check-option" onclick="setVisual('15','no',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">ANOMALÍA</span></label>
+        <label class="check-option" onclick="setVisual('15','na',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">N/A</span></label>
+      </div>
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="15" data-field="presion" placeholder="—">
+        <span class="range-hint" id="hint-15-presion"></span>
+      </div>
+    </div>
+    <div class="anomaly-flag" id="anom-15">⚠ Anomalía detectada — describir en comentarios</div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 16 -->
+  <div class="equip-row" id="row-16">
+    <div class="equip-top">
+      <span class="equip-num">16</span>
+      <span class="equip-tag">PG-214</span>
+      <span class="equip-desc">Presión Aire Instrumental</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="16" data-field="presion" placeholder="—"
+          data-min="0.5" data-max="0.8" data-warn-low="0.55" data-warn-high="0.75">
+        <span class="range-hint" id="hint-16-presion">Rango: 0.5 – 0.8 MPa</span>
+      </div>
+    </div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 17 -->
+  <div class="equip-row" id="row-17">
+    <div class="equip-top">
+      <span class="equip-num">17</span>
+      <span class="equip-tag">PG-210</span>
+      <span class="equip-desc">Manómetro A. Arriba PCV-202/203</span>
+    </div>
+    <div class="equip-fields">
+      <div class="visual-row" id="vis-17">
+        <label class="check-option" onclick="setVisual('17','ok',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">OK</span></label>
+        <label class="check-option" onclick="setVisual('17','no',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">ANOMALÍA</span></label>
+        <label class="check-option" onclick="setVisual('17','na',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">N/A</span></label>
+      </div>
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="17" data-field="presion" placeholder="—">
+        <span class="range-hint" id="hint-17-presion"></span>
+      </div>
+    </div>
+    <div class="anomaly-flag" id="anom-17">⚠ Anomalía detectada — describir en comentarios</div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 18 -->
+  <div class="equip-row" id="row-18">
+    <div class="equip-top">
+      <span class="equip-num">18</span>
+      <span class="equip-tag">PG-211</span>
+      <span class="equip-desc">Manómetro A. Abajo PCV-202</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="18" data-field="presion" placeholder="—">
+        <span class="range-hint" id="hint-18-presion"></span>
+      </div>
+    </div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 19 -->
+  <div class="equip-row" id="row-19">
+    <div class="equip-top">
+      <span class="equip-num">19</span>
+      <span class="equip-tag">PCV-203</span>
+      <span class="equip-desc">Presión N₂ hacia V-201</span>
+    </div>
+    <div class="visual-section-label">Integridad visual</div>
+    <div class="equip-fields">
+      <div class="visual-row" id="vis-19">
+        <label class="check-option" onclick="setVisual('19','ok',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">OK</span></label>
+        <label class="check-option" onclick="setVisual('19','no',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">ANOMALÍA</span></label>
+        <label class="check-option" onclick="setVisual('19','na',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">N/A</span></label>
+      </div>
+    </div>
+    <div class="anomaly-flag" id="anom-19">⚠ Anomalía detectada — describir en comentarios</div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 20 -->
+  <div class="equip-row" id="row-20">
+    <div class="equip-top">
+      <span class="equip-num">20</span>
+      <span class="equip-tag">PG-212</span>
+      <span class="equip-desc">Manómetro en A. Abajo PCV-203</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="20" data-field="presion" placeholder="—">
+        <span class="range-hint" id="hint-20-presion"></span>
+      </div>
+    </div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ NIVEL 3 - SKID 200 ══════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-stripe"></div>
+    <span class="section-title">Nivel 3 — Skid 200</span>
+    <span class="section-count">21 – 23</span>
+  </div>
+
+  <!-- 21 -->
+  <div class="equip-row" id="row-21">
+    <div class="equip-top">
+      <span class="equip-num">21</span>
+      <span class="equip-tag">E-202</span>
+      <span class="equip-desc">Intercambiador de tope T-200</span>
+    </div>
+    <div class="visual-section-label">Integridad visual</div>
+    <div class="equip-fields">
+      <div class="visual-row" id="vis-21">
+        <label class="check-option" onclick="setVisual('21','ok',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">OK</span></label>
+        <label class="check-option" onclick="setVisual('21','no',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">ANOMALÍA</span></label>
+        <label class="check-option" onclick="setVisual('21','na',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">N/A</span></label>
+      </div>
+    </div>
+    <div class="anomaly-flag" id="anom-21">⚠ Anomalía detectada — describir en comentarios</div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 22 -->
+  <div class="equip-row" id="row-22">
+    <div class="equip-top">
+      <span class="equip-num">22</span>
+      <span class="equip-tag">PG-206</span>
+      <span class="equip-desc">Presión T-200</span>
+    </div>
+    <div class="equip-fields">
+      <div class="field-group">
+        <span class="field-label">Presión [MPa]</span>
+        <input type="number" step="0.001" class="field-input" data-row="22" data-field="presion" placeholder="—">
+        <span class="range-hint" id="hint-22-presion"></span>
+      </div>
+    </div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 23 -->
+  <div class="equip-row" id="row-23">
+    <div class="equip-top">
+      <span class="equip-num">23</span>
+      <span class="equip-tag">T-200</span>
+      <span class="equip-desc">Torre de separación</span>
+    </div>
+    <div class="visual-section-label">Integridad visual</div>
+    <div class="equip-fields">
+      <div class="visual-row" id="vis-23">
+        <label class="check-option" onclick="setVisual('23','ok',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">OK</span></label>
+        <label class="check-option" onclick="setVisual('23','no',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">ANOMALÍA</span></label>
+        <label class="check-option" onclick="setVisual('23','na',this)"><input type="radio"><span class="check-dot"></span><span class="check-text">N/A</span></label>
+      </div>
+    </div>
+    <div class="anomaly-flag" id="anom-23">⚠ Anomalía detectada — describir en comentarios</div>
+    <div class="equip-fields" style="margin-top:6px">
+      <div class="field-group full"><textarea class="comment-input" placeholder="Comentarios..." rows="1"></textarea></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SUBMIT ══ -->
+<div class="submit-area">
+  <div class="summary-chips" id="summary-chips">
+    <span class="chip chip-idle">Completando inspección...</span>
+  </div>
+  <button class="btn-submit" id="btn-submit" onclick="submitForm()">
+    Registrar Inspección
+  </button>
+</div>
+
+<!-- ══ SUCCESS SCREEN ══ -->
+<div id="success-screen">
+  <div style="width:100%;max-width:420px">
+    <div style="text-align:center;margin-bottom:20px">
+      <!-- mini logo -->
+      <svg width="40" height="40" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:8px">
+        <path d="M30 30 C30 20, 38 12, 44 16 C50 20, 48 30, 42 32 C36 34, 30 30, 30 30Z" fill="#ed1e79"/>
+        <path d="M30 30 C38 30, 46 36, 44 44 C42 50, 32 50, 28 44 C24 38, 30 30, 30 30Z" fill="#f26522"/>
+        <path d="M30 30 C30 38, 22 46, 16 42 C10 38, 12 28, 18 26 C24 24, 30 30, 30 30Z" fill="#fbb040"/>
+        <path d="M30 30 C22 30, 14 24, 16 16 C18 10, 28 10, 32 16 C36 22, 30 30, 30 30Z" fill="#00a99d"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="success-header">
+    <div class="success-check">✓</div>
+    <div>
+      <div class="success-title">Inspección Registrada</div>
+      <div class="success-sub" id="success-meta"></div>
+    </div>
+  </div>
+
+  <div class="summary-card">
+    <div class="summary-card-title">Resumen de Inspección</div>
+    <div id="success-summary"></div>
+  </div>
+
+  <div class="sync-note">
+    <span style="font-size:18px">⟳</span>
+    <span>Al conectar en sala de control los datos se sincronizan automáticamente</span>
+  </div>
+
+  <button class="btn-new" onclick="resetForm()">Nueva Inspección</button>
+</div>
+
+<script>
+const formData = {}, visualState = {}, rowStatus = {};
+const rowsTouched = new Set();
+const TOTAL = 23;
+const visualRows = [1,3,6,9,10,14,15,17,19,21,23];
+
+function setVisual(rowId, val, el) {
+  const vis = document.getElementById(`vis-${rowId}`);
+  if (!vis) return;
+  vis.querySelectorAll('.check-option').forEach(o => o.classList.remove('selected-ok','selected-no','selected-na'));
+  el.classList.add({ ok:'selected-ok', no:'selected-no', na:'selected-na' }[val]);
+  visualState[rowId] = val;
+  const anom = document.getElementById(`anom-${rowId}`);
+  if (anom) anom.classList.toggle('visible', val === 'no');
+  updateRowStatus(rowId);
+  rowsTouched.add(parseInt(rowId));
+  updateProgress();
+}
+
+function handleAceite(sel, rowId) {
+  sel.classList.remove('aceite-ok','aceite-warn');
+  if (sel.value === 'NORMAL') sel.classList.add('aceite-ok');
+  else if (sel.value === 'BAJO' || sel.value === 'SIN ACEITE') sel.classList.add('aceite-warn');
+  rowsTouched.add(parseInt(rowId));
+  updateRowStatus(rowId);
+  updateProgress();
+}
+
+function updateRowStatus(rowId) {
+  const row = document.getElementById(`row-${rowId}`);
+  if (!row) return;
+  row.classList.remove('status-ok','status-warn','status-danger');
+  const vis = visualState[rowId];
+  let anyDanger = false, anyWarn = false, anyFilled = false;
+  row.querySelectorAll('.field-input[type="number"]').forEach(inp => {
+    if (inp.value !== '') anyFilled = true;
+    if (inp.classList.contains('value-danger')) anyDanger = true;
+    if (inp.classList.contains('value-warn')) anyWarn = true;
+  });
+  if (vis === 'no' || anyDanger) { row.classList.add('status-danger'); rowStatus[rowId] = 'danger'; }
+  else if (anyWarn) { row.classList.add('status-warn'); rowStatus[rowId] = 'warn'; }
+  else if (vis === 'ok' || vis === 'na' || anyFilled) { row.classList.add('status-ok'); rowStatus[rowId] = 'ok'; }
+  else delete rowStatus[rowId];
+}
+
+function checkRange(inp) {
+  const val = parseFloat(inp.value);
+  const rId = inp.dataset.row, fId = inp.dataset.field;
+  const hint = document.getElementById(`hint-${rId}-${fId}`);
+  inp.classList.remove('value-warn','value-danger','value-ok');
+  if (hint) hint.classList.remove('hint-warn','hint-danger','hint-ok');
+  if (inp.value === '' || isNaN(val)) { updateRowStatus(rId); updateProgress(); return; }
+
+  const mn = parseFloat(inp.dataset.min), mx = parseFloat(inp.dataset.max);
+  const wl = parseFloat(inp.dataset.warnLow), wh = parseFloat(inp.dataset.warnHigh);
+  let cls = 'value-ok', hCls = 'hint-ok', hTxt = '✓ Dentro de rango';
+
+  if (!isNaN(mn) && !isNaN(mx)) {
+    if (val < mn || val > mx) {
+      cls = 'value-danger'; hCls = 'hint-danger'; hTxt = `⛔ Fuera de rango (${mn} – ${mx})`;
+    } else if ((!isNaN(wl) && val < wl) || (!isNaN(wh) && val > wh)) {
+      cls = 'value-warn'; hCls = 'hint-warn'; hTxt = '⚠ Valor en límite';
+    }
+  }
+
+  inp.classList.add(cls);
+  if (hint) { hint.textContent = hTxt; hint.classList.add(hCls); }
+  rowsTouched.add(parseInt(rId));
+  updateRowStatus(rId);
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = rowsTouched.size;
+  const pct = Math.round((done / TOTAL) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-label').textContent = `${done} / ${TOTAL} equipos`;
+
+  let ok = 0, warn = 0, danger = 0;
+  Object.values(rowStatus).forEach(s => { if(s==='ok') ok++; else if(s==='warn') warn++; else if(s==='danger') danger++; });
+
+  let chips = '';
+  if (done === 0) {
+    chips = '<span class="chip chip-idle">Completando inspección...</span>';
+  } else {
+    if (ok > 0)     chips += `<span class="chip chip-ok">✓ ${ok} OK</span>`;
+    if (warn > 0)   chips += `<span class="chip chip-warn">⚠ ${warn} Alerta</span>`;
+    if (danger > 0) chips += `<span class="chip chip-danger">⛔ ${danger} Anomalía</span>`;
+  }
+  document.getElementById('summary-chips').innerHTML = chips;
+}
+
+function submitForm() {
+  const fecha = document.getElementById('meta-fecha').value;
+  const turno = document.getElementById('meta-turno').value;
+  const operador = document.getElementById('meta-operador').value.trim();
+  if (!fecha || !turno || !operador) {
+    alert('Por favor completa Fecha, Turno y Operador.');
+    return;
+  }
+  let ok = 0, warn = 0, danger = 0;
+  Object.values(rowStatus).forEach(s => { if(s==='ok') ok++; else if(s==='warn') warn++; else if(s==='danger') danger++; });
+  const anomEquips = visualRows.filter(id => visualState[id]==='no')
+    .map(id => document.querySelector(`#row-${id} .equip-tag`).textContent);
+
+  document.getElementById('success-meta').textContent = `${fecha}  ·  ${turno}  ·  ${operador}`;
+  
+  let html = `
+    <div class="summary-row"><span class="s-label">Equipos inspeccionados</span><span class="s-val val-navy">${rowsTouched.size} / ${TOTAL}</span></div>
+    <div class="summary-row"><span class="s-label">Sin anomalías</span><span class="s-val val-ok">${ok}</span></div>
+    <div class="summary-row"><span class="s-label">Alertas de rango</span><span class="s-val ${warn>0?'val-warn':'val-ok'}">${warn}</span></div>
+    <div class="summary-row"><span class="s-label">Anomalías visuales</span><span class="s-val ${danger>0?'val-danger':'val-ok'}">${danger}</span></div>
+  `;
+  if (anomEquips.length > 0) {
+    html += `<div class="summary-row" style="flex-direction:column;align-items:flex-start;gap:4px">
+      <span class="s-label">Equipos con anomalía</span>
+      <span style="color:var(--danger);font-weight:700;font-size:12px">${anomEquips.join(', ')}</span>
+    </div>`;
+  }
+  document.getElementById('success-summary').innerHTML = html;
+  document.getElementById('success-screen').classList.add('visible');
+  console.log('INSPECCION REGISTRADA:', { fecha, turno, operador, rowStatus, visualState });
+}
+
+function resetForm() {
+  document.getElementById('success-screen').classList.remove('visible');
+  ['meta-fecha','meta-operador'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('meta-turno').value = '';
+  document.querySelectorAll('.field-input').forEach(i => { i.value=''; i.classList.remove('value-ok','value-warn','value-danger','aceite-ok','aceite-warn'); });
+  document.querySelectorAll('.comment-input').forEach(i => i.value='');
+  document.querySelectorAll('.check-option').forEach(o => o.classList.remove('selected-ok','selected-no','selected-na'));
+  document.querySelectorAll('.anomaly-flag').forEach(e => e.classList.remove('visible'));
+  document.querySelectorAll('.equip-row').forEach(r => r.classList.remove('status-ok','status-warn','status-danger'));
+  document.querySelectorAll('.range-hint').forEach(h => { h.classList.remove('hint-ok','hint-warn','hint-danger'); });
+  [formData, visualState, rowStatus].forEach(o => Object.keys(o).forEach(k => delete o[k]));
+  rowsTouched.clear();
+  updateProgress();
+  document.getElementById('meta-fecha').value = new Date().toISOString().split('T')[0];
+}
+
+document.querySelectorAll('.field-input[type="number"]').forEach(inp => inp.addEventListener('input', () => checkRange(inp)));
+document.getElementById('meta-fecha').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
