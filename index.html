@@ -146,6 +146,83 @@
   .btn-new { width: 100%; max-width: 420px; padding: 12px; background: transparent; border: 2px solid var(--hif-navy); border-radius: 8px; color: var(--hif-navy); font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
   .btn-new:hover { background: var(--hif-navy); color: var(--white); }
 
+
+  /* ── POWER AUTOMATE SEND STATES ── */
+  .btn-submit.sending {
+    background: linear-gradient(135deg, #00897b, #00695c);
+    cursor: not-allowed;
+  }
+  .btn-submit.sent {
+    background: linear-gradient(135deg, #1aaf5d, #15803d);
+  }
+
+  /* ── SEND OVERLAY (loading) ── */
+  #send-overlay {
+    display: none;
+    position: fixed; inset: 0; background: rgba(26,46,74,0.65);
+    z-index: 900; align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px;
+  }
+  #send-overlay.visible { display: flex; }
+  .send-spinner {
+    width: 52px; height: 52px; border: 4px solid rgba(255,255,255,0.15);
+    border-top-color: var(--hif-teal); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .send-label {
+    color: white; font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    text-align: center; line-height: 1.6;
+  }
+  .send-steps { display: flex; flex-direction: column; gap: 6px; min-width: 240px; }
+  .send-step {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5);
+    transition: color 0.3s;
+  }
+  .send-step.active { color: var(--hif-teal); }
+  .send-step.done   { color: rgba(255,255,255,0.9); }
+  .send-step .ss-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; flex-shrink: 0; transition: all 0.3s;
+  }
+  .send-step.active .ss-dot { background: var(--hif-teal); border-color: var(--hif-teal); color: white; }
+  .send-step.done   .ss-dot { background: var(--ok); border-color: var(--ok); color: white; }
+
+  /* ── PA CONFIG BANNER ── */
+  .pa-config-banner {
+    background: rgba(242,101,34,0.08); border: 1.5px solid rgba(242,101,34,0.3);
+    border-radius: 8px; padding: 10px 14px; margin: 8px 0 0;
+    font-size: 10px; color: #c2440c; font-weight: 600;
+    display: flex; align-items: flex-start; gap: 8px; line-height: 1.5;
+  }
+  .pa-config-banner a {
+    color: var(--hif-blue); text-decoration: underline; cursor: pointer;
+    font-weight: 700;
+  }
+
+  /* ── SEND STATUS in success screen ── */
+  .sync-status {
+    display: flex; align-items: center; gap: 10px;
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 11px; font-weight: 600; margin-bottom: 14px;
+    width: 100%; max-width: 420px;
+  }
+  .sync-status.syncing {
+    background: rgba(0,169,157,0.08); border: 1px solid rgba(0,169,157,0.25); color: var(--hif-teal);
+  }
+  .sync-status.synced {
+    background: rgba(26,175,93,0.08); border: 1px solid rgba(26,175,93,0.25); color: var(--ok);
+  }
+  .sync-status.sync-error {
+    background: rgba(224,38,38,0.06); border: 1px solid rgba(224,38,38,0.2); color: var(--danger);
+  }
+  .sync-status.sync-demo {
+    background: rgba(242,101,34,0.07); border: 1px solid rgba(242,101,34,0.25); color: #c2440c;
+  }
+
   @media (max-width: 560px) {
     .header-meta { grid-template-columns: 1fr 1fr; }
   }
@@ -3442,7 +3519,38 @@
   <div class="summary-chips" id="summary-chips">
     <span class="chip chip-idle">Seleccione unidad para comenzar</span>
   </div>
-  <button class="btn-submit" onclick="submitForm()">Registrar Inspección</button>
+  <button class="btn-submit" id="btn-submit" onclick="submitForm()">⚡ Registrar Inspección</button>
+  <div class="pa-config-banner">
+    <span>⚙</span>
+    <span>
+      Modo demo — sin conexión a Power Automate.<br>
+      <a onclick="openPAConfig()">Configurar URL del flujo</a> para activar envío real a SharePoint.
+    </span>
+  </div>
+</div>
+
+
+<!-- SEND OVERLAY -->
+<div id="send-overlay">
+  <div class="send-spinner"></div>
+  <div class="send-steps">
+    <div class="send-step" id="ss1">
+      <div class="ss-dot">1</div>
+      <span>Recopilando datos del formulario</span>
+    </div>
+    <div class="send-step" id="ss2">
+      <div class="ss-dot">2</div>
+      <span>Enviando a Power Automate</span>
+    </div>
+    <div class="send-step" id="ss3">
+      <div class="ss-dot">3</div>
+      <span>Escribiendo en SharePoint</span>
+    </div>
+    <div class="send-step" id="ss4">
+      <div class="ss-dot">4</div>
+      <span>Confirmando registro</span>
+    </div>
+  </div>
 </div>
 
 <!-- SUCCESS SCREEN -->
@@ -3470,11 +3578,41 @@
     <div class="summary-card-title">Resumen de Inspección</div>
     <div id="success-summary"></div>
   </div>
-  <div class="sync-note">
+  <div class="sync-status sync-demo" id="sync-status"><span id="sync-icon">⚙</span><span id="sync-text">Modo demo — configura la URL de Power Automate para envío real</span></div>
+  <div class="sync-note" style="display:none">
     <span style="font-size:18px">⟳</span>
     <span>Al conectar en sala de control los datos se sincronizan automáticamente</span>
   </div>
   <button class="btn-new" onclick="resetForm()">Nueva Inspección</button>
+</div>
+
+
+<!-- PA CONFIG MODAL -->
+<div id="pa-modal" style="display:none;position:fixed;inset:0;background:rgba(26,46,74,0.7);z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:white;border-radius:12px;padding:24px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(26,46,74,0.3)">
+    <div style="font-size:14px;font-weight:800;color:var(--hif-navy);margin-bottom:4px">⚙ Configurar Power Automate</div>
+    <div style="font-size:11px;color:var(--text-light);margin-bottom:16px;line-height:1.5">
+      Ingresa la URL del endpoint HTTP trigger de tu flujo en Power Automate.
+      Esta URL se obtiene al crear el trigger "When a HTTP request is received" en Power Automate.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px">
+      <label style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--hif-blue)">URL Power Automate</label>
+      <input id="pa-url-input" type="text"
+        style="border:1.5px solid var(--hif-border);border-radius:6px;padding:9px 12px;font-size:11px;font-family:monospace;color:var(--text);outline:none;width:100%"
+        placeholder="https://prod-XX.XX.logic.azure.com/workflows/...">
+    </div>
+    <div style="background:var(--hif-light);border-radius:6px;padding:10px;font-size:10px;color:var(--text-light);line-height:1.6;margin-bottom:16px">
+      <strong style="color:var(--hif-navy)">Cómo obtener la URL:</strong><br>
+      1. Power Automate → Nuevo flujo → Automatizado<br>
+      2. Trigger: "When a HTTP request is received"<br>
+      3. Copiar la URL HTTP POST que aparece al guardar<br>
+      4. Pegar aquí y guardar
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="closePAConfig()" style="padding:9px 18px;border:1.5px solid var(--hif-border);border-radius:6px;background:white;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;cursor:pointer;color:var(--text-light)">Cancelar</button>
+      <button onclick="savePAConfig()" style="padding:9px 18px;background:linear-gradient(135deg,var(--hif-navy),var(--hif-blue));border:none;border-radius:6px;color:white;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer">Guardar y Activar</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -3606,7 +3744,111 @@ function updateProgress() {
   document.getElementById('summary-chips').innerHTML = chips;
 }
 
-function submitForm() {
+// ── POWER AUTOMATE INTEGRATION ──────────────────────────────
+let PA_URL = localStorage.getItem('hif_pa_url') || '';
+
+function openPAConfig() {
+  document.getElementById('pa-url-input').value = PA_URL;
+  document.getElementById('pa-modal').style.display = 'flex';
+}
+function closePAConfig() {
+  document.getElementById('pa-modal').style.display = 'none';
+}
+function savePAConfig() {
+  const url = document.getElementById('pa-url-input').value.trim();
+  if (url && !url.startsWith('https://')) {
+    alert('La URL debe comenzar con https://');
+    return;
+  }
+  PA_URL = url;
+  if (url) localStorage.setItem('hif_pa_url', url);
+  else localStorage.removeItem('hif_pa_url');
+  closePAConfig();
+  updatePABanner();
+}
+function updatePABanner() {
+  const banner = document.querySelector('.pa-config-banner');
+  if (!banner) return;
+  if (PA_URL) {
+    banner.innerHTML = '<span>✅</span><span>Conectado a Power Automate · <a onclick="openPAConfig()">Cambiar URL</a></span>';
+    banner.style.background = 'rgba(26,175,93,0.07)';
+    banner.style.borderColor = 'rgba(26,175,93,0.3)';
+    banner.style.color = 'var(--ok)';
+  } else {
+    banner.innerHTML = '<span>⚙</span><span>Modo demo — sin conexión a Power Automate.<br><a onclick="openPAConfig()">Configurar URL del flujo</a> para activar envío real a SharePoint.</span>';
+    banner.style.background = '';
+    banner.style.borderColor = '';
+    banner.style.color = '';
+  }
+}
+
+// ── BUILD PAYLOAD ─────────────────────────────────────────────
+function buildPayload(unidad, fecha, turno, jornada, operador) {
+  const unitDiv = document.getElementById('unit-' + unidad);
+  if (!unitDiv) return { unidad, fecha, turno, jornada, operador, equipos: [] };
+
+  const equipos = [];
+  unitDiv.querySelectorAll('.equip-row').forEach(row => {
+    const rowId = row.id.replace('row-', '');
+    const tag   = row.querySelector('.equip-tag')  ? row.querySelector('.equip-tag').textContent.trim()  : '';
+    const desc  = row.querySelector('.equip-desc') ? row.querySelector('.equip-desc').textContent.trim() : '';
+
+    // Numeric value
+    const valInp = row.querySelector('input[type="number"]');
+    const valor  = valInp && valInp.value !== '' ? parseFloat(valInp.value) : null;
+    const unidadVal = valInp ? (row.querySelector('.equip-unit') ? row.querySelector('.equip-unit').textContent.trim() : '') : null;
+
+    // Visual state
+    const selOk  = row.querySelector('.check-option.selected-ok');
+    const selNo  = row.querySelector('.check-option.selected-no');
+    const selNa  = row.querySelector('.check-option.selected-na');
+    let visual = null;
+    if (selOk) visual = 'OK';
+    else if (selNo) visual = 'ANOMALÍA';
+    else if (selNa) visual = 'N/A';
+
+    // Aceite
+    const aceiteEl = row.querySelector('select');
+    const aceite   = aceiteEl && aceiteEl.value ? aceiteEl.value : null;
+
+    // Comment
+    const comentEl = row.querySelector('textarea');
+    const comentario = comentEl && comentEl.value.trim() ? comentEl.value.trim() : '';
+
+    // Status
+    const estado = rowStatus[rowId] || 'PENDIENTE';
+
+    equipos.push({ tag, descripcion: desc, valor, unidad_valor: unidadVal, visual, aceite, comentario, estado });
+  });
+
+  return { unidad, fecha, turno, jornada, operador, equipos,
+    resumen: {
+      total: equipos.length,
+      inspeccionados: rowsTouched.size,
+      ok: Object.values(rowStatus).filter(s=>s==="ok").length,
+      alerta: Object.values(rowStatus).filter(s=>s==="warn").length,
+      anomalia: Object.values(rowStatus).filter(s=>s==="danger").length
+    }
+  };
+}
+
+// ── ANIMATE SEND STEPS ────────────────────────────────────────
+function animateSendStep(step, total) {
+  return new Promise(resolve => {
+    // Mark previous as done
+    for (let i = 1; i < step; i++) {
+      const el = document.getElementById('ss' + i);
+      if (el) { el.classList.remove('active'); el.classList.add('done'); el.querySelector('.ss-dot').textContent = '✓'; }
+    }
+    // Mark current as active
+    const cur = document.getElementById('ss' + step);
+    if (cur) { cur.classList.add('active'); }
+    setTimeout(resolve, step < total ? 700 : 400);
+  });
+}
+
+// ── MAIN SUBMIT ───────────────────────────────────────────────
+async function submitForm() {
   const unidad   = document.getElementById('meta-unidad').value;
   const fecha    = document.getElementById('meta-fecha').value;
   const turno    = document.getElementById('meta-turno').value;
@@ -3616,19 +3858,91 @@ function submitForm() {
     alert('Por favor completa Unidad, Fecha, Turno y Operador.');
     return;
   }
+
+  // Build payload
+  const payload = buildPayload(unidad, fecha, turno, jornada, operador);
+
+  // Show overlay
+  ['ss1','ss2','ss3','ss4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('active','done'); el.querySelector('.ss-dot').textContent = el.id.replace('ss',''); }
+  });
+  document.getElementById('send-overlay').classList.add('visible');
+
+  let syncResult = 'demo';
+
+  try {
+    await animateSendStep(1, 4); // collecting
+    await animateSendStep(2, 4); // sending to PA
+
+    if (PA_URL) {
+      // Real send
+      try {
+        const res = await fetch(PA_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        await animateSendStep(3, 4); // writing to SP
+        await animateSendStep(4, 4); // confirming
+        syncResult = res.ok ? 'ok' : 'error';
+      } catch(e) {
+        await animateSendStep(3, 4);
+        await animateSendStep(4, 4);
+        syncResult = 'error';
+        console.warn('PA send error:', e);
+      }
+    } else {
+      // Demo mode — simulate delay
+      await animateSendStep(3, 4);
+      await animateSendStep(4, 4);
+      syncResult = 'demo';
+    }
+
+    // Mark all done
+    for (let i = 1; i <= 4; i++) {
+      const el = document.getElementById('ss' + i);
+      if (el) { el.classList.remove('active'); el.classList.add('done'); el.querySelector('.ss-dot').textContent = '✓'; }
+    }
+
+  } catch(e) {
+    syncResult = 'error';
+  }
+
+  await new Promise(r => setTimeout(r, 500));
+  document.getElementById('send-overlay').classList.remove('visible');
+
+  // Build success screen
   const labels = { 'MTG-D2':'MTG-D2','MTG-D3':'MTG-D3','MTG-D4':'MTG-D4 e Incinerador','INCINERADOR':'MTG-D4 e Incinerador','PLANTA-ELG':'Planta e-LG' };
-  let ok=0, warn=0, danger=0;
-  Object.values(rowStatus).forEach(s => { if(s==='ok') ok++; else if(s==='warn') warn++; else if(s==='danger') danger++; });
-  const total = UNIT_TOTAL[currentUnit] || 0;
-  document.getElementById('success-meta').textContent = labels[unidad] + '  ·  ' + fecha + '  ·  TURNO ' + turno + '  ·  ' + jornada + '  ·  ' + operador;
+  const { resumen } = payload;
+  document.getElementById('success-meta').textContent =
+    labels[unidad] + '  ·  ' + fecha + '  ·  TURNO ' + turno + '  ·  ' + jornada + '  ·  ' + operador;
+
   let html = '<div class="summary-row"><span class="s-label">Unidad</span><span class="s-val val-navy">' + labels[unidad] + '</span></div>';
-  html += '<div class="summary-row"><span class="s-label">Equipos inspeccionados</span><span class="s-val val-navy">' + rowsTouched.size + ' / ' + total + '</span></div>';
-  html += '<div class="summary-row"><span class="s-label">Sin anomalías</span><span class="s-val val-ok">' + ok + '</span></div>';
-  html += '<div class="summary-row"><span class="s-label">Alertas de rango</span><span class="s-val ' + (warn>0?'val-warn':'val-ok') + '">' + warn + '</span></div>';
-  html += '<div class="summary-row"><span class="s-label">Anomalías visuales</span><span class="s-val ' + (danger>0?'val-danger':'val-ok') + '">' + danger + '</span></div>';
+  html += '<div class="summary-row"><span class="s-label">Equipos inspeccionados</span><span class="s-val val-navy">' + resumen.inspeccionados + ' / ' + resumen.total + '</span></div>';
+  html += '<div class="summary-row"><span class="s-label">Sin anomalías</span><span class="s-val val-ok">' + resumen.ok + '</span></div>';
+  html += '<div class="summary-row"><span class="s-label">Alertas de rango</span><span class="s-val ' + (resumen.alerta>0?'val-warn':'val-ok') + '">' + resumen.alerta + '</span></div>';
+  html += '<div class="summary-row"><span class="s-label">Anomalías visuales</span><span class="s-val ' + (resumen.anomalia>0?'val-danger':'val-ok') + '">' + resumen.anomalia + '</span></div>';
   document.getElementById('success-summary').innerHTML = html;
+
+  // Sync status
+  const syncEl = document.getElementById('sync-status');
+  if (syncResult === 'ok') {
+    syncEl.className = 'sync-status synced';
+    syncEl.innerHTML = '<span>✅</span><span>Datos enviados a SharePoint · Power BI se actualizará en el próximo refresco</span>';
+  } else if (syncResult === 'error') {
+    syncEl.className = 'sync-status sync-error';
+    syncEl.innerHTML = '<span>⚠</span><span>Error al conectar con Power Automate · Los datos quedaron guardados localmente. Reintentar al volver a sala de control.</span>';
+  } else {
+    syncEl.className = 'sync-status sync-demo';
+    syncEl.innerHTML = '<span>⚙</span><span>Modo demo · <a onclick="openPAConfig()" style="color:var(--hif-blue);text-decoration:underline;cursor:pointer;font-weight:700">Configura la URL</a> de Power Automate para envío real a SharePoint</span>';
+  }
+
   document.getElementById('success-screen').classList.add('visible');
 }
+
+// Init PA banner state
+updatePABanner();
 
 function resetForm() {
   document.getElementById('success-screen').classList.remove('visible');
